@@ -93,8 +93,7 @@ def decrypt(srcfilepath: Path,
         srcfile_mod_time = srcfilepath.stat().st_mtime
         destfile_mod_time = destfilepath.stat().st_mtime
         if srcfile_mod_time <= destfile_mod_time:
-            utils.error(f"输出文件 '{destfilepath}' 是最新的，无需更新")
-            return
+            utils.debug(f"输出文件 '{destfilepath}' 是最新的，无需更新")
         else:
             utils.info(f"输入文件 '{srcfilepath}' 已更新，输出文件 '{destfilepath}' 将被重新生成")
     try:

@@ -66,11 +66,11 @@ def entry(argv: list[str] | None = None) -> int:
             status_pool: list[bool] = mgr.list()
             procs = []
             for srcfilepath_, destdirpath_ in pending_paths:
-              if len(procs) >= max_processes:
-                  # 等待任一进程完成
-                  first_finished_proc = mp.connection.wait([p.sentinel for p in procs], timeout=None)[0]
-                  # 移除所有已完成的进程
-                  procs = [p for p in procs if p.is_alive()]
+                if len(procs) >= max_processes:
+                    # 等待任一进程完成
+                    first_finished_proc = mp.connection.wait([p.sentinel for p in procs], timeout=None)[0]
+                    # 移除所有已完成的进程
+                    procs = [p for p in procs if p.is_alive()]
 
                 mainflow_kwargs = {
                     'srcfilepath': srcfilepath_,

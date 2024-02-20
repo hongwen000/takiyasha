@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import multiprocessing as mp
+from multiprocessing import Pool
 import sys
 from argparse import ArgumentError
 from pathlib import Path
@@ -60,11 +61,17 @@ def entry(argv: list[str] | None = None) -> int:
         utils.warn("您正处于并行处理模式，"
                    "这可能导致 CPU、RAM 等系统资源消耗急剧上升！"
                    )
-
+        max_processes = mp.cpu_count() // 2  # 例如，使用与CPU核心数相等的进程数
         with mp.Manager() as mgr:
             status_pool: list[bool] = mgr.list()
             procs = []
             for srcfilepath_, destdirpath_ in pending_paths:
+              if len(procs) >= max_processes:
+                  # 等待任一进程完成
+                  first_finished_proc = mp.connection.wait([p.sentinel for p in procs], timeout=None)[0]
+                  # 移除所有已完成的进程
+                  procs = [p for p in procs if p.is_alive()]
+
                 mainflow_kwargs = {
                     'srcfilepath': srcfilepath_,
                     'destdirpath': destdirpath_,

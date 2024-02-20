@@ -89,12 +89,16 @@ def decrypt(srcfilepath: Path,
             destfilepath: Path,
             crypter: SupportsCrypter
             ) -> IO[bytes] | None:
-    # 以排他读写模式创建输出文件
+    if destfilepath.exists():
+        srcfile_mod_time = srcfilepath.stat().st_mtime
+        destfile_mod_time = destfilepath.stat().st_mtime
+        if srcfile_mod_time <= destfile_mod_time:
+            utils.error(f"输出文件 '{destfilepath}' 是最新的，无需更新")
+            return
+        else:
+            utils.info(f"输入文件 '{srcfilepath}' 已更新，输出文件 '{destfilepath}' 将被重新生成")
     try:
-        destfile = open(destfilepath, 'x+b')
-    except FileExistsError:  # 输出文件路径已存在时应当引发的异常
-        utils.error(f"输出文件已存在：'{destfilepath}'")
-        return
+        destfile = open(destfilepath, 'wb')  # 以写入模式打开，覆盖原有文件或创建新文件
     except Exception as exc:
         utils.error(f"打开输出文件 '{destfilepath}' 时："
                     f"{type(exc).__name__}: {exc}"
